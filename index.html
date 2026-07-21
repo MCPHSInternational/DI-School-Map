@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
-
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f4f4f4;color:#1a1a1a}
 #topbar{background:#a02842;color:#fff;padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:1000}
@@ -39,27 +38,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .leg-dot{width:9px;height:9px;border-radius:50%}
 .empty{padding:20px;text-align:center;color:#888;font-size:12px}
 
-#detail-panel{position:fixed;top:50px;right:0;width:300px;height:calc(100vh - 50px);background:#fff;border-left:1px solid #ddd;z-index:700;display:none;flex-direction:column;overflow-y:auto;box-shadow:-2px 0 6px rgba(0,0,0,.1)}
-#detail-panel.open{display:flex}
-.dph{background:#a02842;color:#fff;padding:12px 14px;flex-shrink:0;position:relative}
-.dph h2{font-size:13px;font-weight:600;margin-bottom:2px;padding-right:28px}
-.dph p{font-size:11px;color:rgba(255,255,255,.75)}
-.dph-x{position:absolute;top:10px;right:10px;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;padding:2px 6px}
-.dpb{padding:12px;display:flex;flex-direction:column;gap:8px}
-.dps{border:1px solid #eee;border-radius:6px;overflow:hidden}
-.dpsh{background:#f5f5f5;padding:4px 10px;font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em}
-.dpsb{padding:8px 10px;display:flex;flex-direction:column;gap:5px}
-.dpr{display:flex;gap:8px;align-items:flex-start}
-.dpl{font-size:11px;color:#888;min-width:65px;flex-shrink:0;padding-top:3px}
-.dpv{font-size:12px;color:#333;flex:1;line-height:1.5}
-.dpf{width:100%;padding:4px 7px;font-size:12px;border:1px solid #ddd;border-radius:4px;font-family:inherit}
-.dpf:focus{outline:none;border-color:#a02842}
-.dpsave{width:100%;padding:8px;background:#0F6E56;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:500;margin-top:4px}
-
+#dp{position:fixed;top:50px;right:0;width:300px;height:calc(100vh - 50px);background:#fff;border-left:1px solid #ddd;z-index:700;display:none;flex-direction:column;overflow-y:auto;box-shadow:-2px 0 6px rgba(0,0,0,.1)}
+#dp.open{display:flex}
+#dp-h{background:#a02842;color:#fff;padding:12px 14px;flex-shrink:0;position:relative}
+#dp-h h2{font-size:13px;font-weight:600;margin-bottom:2px;padding-right:28px}
+#dp-h p{font-size:11px;color:rgba(255,255,255,.75);margin:0}
+#dp-x{position:absolute;top:8px;right:10px;background:none;border:none;color:#fff;font-size:22px;cursor:pointer;line-height:1}
+#dp-b{padding:12px;display:flex;flex-direction:column;gap:8px}
+.ds{border:1px solid #eee;border-radius:6px;overflow:hidden}
+.ds-h{background:#f5f5f5;padding:4px 10px;font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em}
+.ds-b{padding:8px 10px;display:flex;flex-direction:column;gap:5px}
+.dr{display:flex;gap:8px;align-items:flex-start}
+.dl{font-size:11px;color:#888;min-width:65px;flex-shrink:0;padding-top:3px}
+.dv{font-size:12px;color:#333;flex:1}
+.df{width:100%;padding:4px 7px;font-size:12px;border:1px solid #ddd;border-radius:4px;font-family:inherit}
+.dsv{width:100%;padding:8px;background:#0F6E56;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:500;margin-top:4px}
 </style>
 </head>
 <body>
-
 <div id="topbar">
   <h1>MCPHS Recruitment Map</h1>
   <div class="top-pills">
@@ -135,18 +131,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-
-<div id="detail-panel">
-  <div class="dph">
-    <h2 id="dp-name"></h2>
-    <p id="dp-loc"></p>
-    <button class="dph-x" onclick="closeDetail()">&#215;</button>
-  </div>
-  <div class="dpb" id="dp-body"></div>
-</div>
-
 <script>
-
 const INIT_SCHOOLS = [
   {id:1,name:"The Williams School",city:"New London",state:"CT",lat:41.376,lng:-72.104,type:"Day School",phone:"(860) 443-5333",email:"admissions@williamsschool.org",website:"https://williamsschool.org",ccName:"Heather DeLaurentis",ccEmail:"collegecounseling@williamsschool.org",ccPhone:"(860) 439-2790",tool:"",eventDate:"",priority:"Medium",intlFocus:"China",intlPct:{Chinese:10,Korean:5,Vietnamese:2,Indian:2,Other:6},notes:"Hosts annual College Fair (fall). Contact CC office to schedule rep visit.",vis:true},
   {id:2,name:"Worcester Academy",city:"Worcester",state:"MA",lat:42.253,lng:-71.790,type:"Boarding School",phone:"(508) 754-5302",email:"admissions@worcesteracademy.org",website:"https://worcesteracademy.org",ccName:"College Counseling Office",ccEmail:"collegecounseling@worcesteracademy.org",ccPhone:"",tool:"MaiaLearning",eventDate:"",priority:"High",intlFocus:"Mixed",intlPct:{Chinese:15,Korean:10,Vietnamese:5,Indian:5,Other:15},notes:"~150 college reps visit each fall. Use MaiaLearning to schedule rep visits.",vis:true},
@@ -996,73 +981,58 @@ function hideAll() {
   applyFilters();
 }
 
-
-function closeDetail() {
-  document.getElementById('detail-panel').classList.remove('open');
+function dpClose(){document.getElementById('dp').classList.remove('open');}
+function showDetail(id){
+  var s=schools.find(function(x){return x.id===id;});
+  if(!s)return;
+  if(s.lat&&s.lng)map.setView([s.lat,s.lng],12);
+  document.getElementById('dp-n').textContent=s.name;
+  document.getElementById('dp-l').textContent=[s.city,s.state,s.type].filter(Boolean).join(' - ');
+  var ly=(s.layers||[s.layer||'School']).join(', ');
+  var tl=s.tool||'';
+  var to=['','Scoir','MaiaLearning','Naviance','Cialfo','Other'].map(function(t){return '<option'+(tl===t?' selected':'')+'>'+t+'</option>';}).join('');
+  var vs=s.visitStatus||'Not Started';
+  var so=['Not Started','Scheduled','Confirmed','Completed','Cancelled'].map(function(v){return '<option'+(vs===v?' selected':'')+'>'+v+'</option>';}).join('');
+  var h='<div style="font-size:11px;color:#666;margin-bottom:4px">Layers: <b>'+ly+'</b></div>';
+  h+='<div class="ds"><div class="ds-h">Contact</div><div class="ds-b">';
+  h+='<div class="dr"><div class="dl">Name</div><input class="df" id="dc-n" value="'+(s.ccName||s.contactName||'')+'"/></div>';
+  h+='<div class="dr"><div class="dl">Phone</div><input class="df" id="dc-p" value="'+(s.phone||'')+'"/></div>';
+  h+='<div class="dr"><div class="dl">Email</div><input class="df" id="dc-e" value="'+(s.email||s.ccEmail||'')+'"/></div>';
+  h+='<div class="dr"><div class="dl">Website</div><input class="df" id="dc-w" value="'+(s.website||'')+'"/></div>';
+  h+='</div></div>';
+  h+='<div class="ds"><div class="ds-h">Scheduling</div><div class="ds-b">';
+  h+='<div class="dr"><div class="dl">Tool</div><select class="df" id="dc-t">'+to+'</select></div>';
+  h+='<div class="dr"><div class="dl">Event</div><input class="df" type="date" id="dc-d" value="'+(s.eventDate||'')+'"/></div>';
+  h+='</div></div>';
+  h+='<div class="ds"><div class="ds-h">Visit Info</div><div class="ds-b">';
+  h+='<div class="dr"><div class="dl">Status</div><select class="df" id="dc-s">'+so+'</select></div>';
+  h+='<div class="dr"><div class="dl">Intl %</div><div class="dv">'+(s.intlFocus||s.intlPct||'-')+'</div></div>';
+  h+='<div class="dr"><div class="dl">Yield</div><div class="dv">'+(s.yieldRating||'-')+'</div></div>';
+  h+='<div class="dr"><div class="dl">Region</div><div class="dv">'+(s.region||'-')+'</div></div>';
+  h+='</div></div>';
+  h+='<div class="ds"><div class="ds-h">Notes</div><div class="ds-b">';
+  h+='<textarea class="df" id="dc-nt" rows="4" style="resize:vertical">'+(s.notes||'')+'</textarea>';
+  if(s.enrollmentNote){h+='<div style="background:#F0E8FA;padding:5px 7px;border-radius:4px;font-size:11px;color:#4A1878;margin-top:3px"><b>DI:</b> '+s.enrollmentNote+'</div>';}
+  h+='</div></div>';
+  h+='<button class="dsv" onclick="dpSave('+id+')">Save changes</button>';
+  document.getElementById('dp-b').innerHTML=h;
+  document.getElementById('dp').classList.add('open');
 }
-
-function showDetail(id) {
-  var s = schools.find(function(x){ return x.id === id; });
-  if (!s) return;
-  if (s.lat && s.lng) map.setView([s.lat, s.lng], 12);
-  document.getElementById('dp-name').textContent = s.name;
-  var loc = [s.city, s.state, s.type].filter(Boolean).join(' - ');
-  document.getElementById('dp-loc').textContent = loc;
-  var layers = (s.layers || [s.layer || 'School']).join(', ');
-  var tool = s.tool || '';
-  var toolOpts = ['','Scoir','MaiaLearning','Naviance','Cialfo','Other'].map(function(t){
-    return '<option' + (tool === t ? ' selected' : '') + '>' + t + '</option>';
-  }).join('');
-  var status = s.visitStatus || 'Not Started';
-  var statusOpts = ['Not Started','Scheduled','Confirmed','Completed','Cancelled'].map(function(v){
-    return '<option' + (status === v ? ' selected' : '') + '>' + v + '</option>';
-  }).join('');
-  var html = '';
-  html += '<div style="font-size:11px;color:#666;margin-bottom:4px">Layers: <b>' + layers + '</b></div>';
-  html += '<div class="dps"><div class="dpsh">Contact</div><div class="dpsb">';
-  html += '<div class="dpr"><div class="dpl">Name</div><input class="dpf" id="d-cn" value="' + (s.ccName || s.contactName || '') + '"/></div>';
-  html += '<div class="dpr"><div class="dpl">Phone</div><input class="dpf" id="d-ph" value="' + (s.phone || '') + '"/></div>';
-  html += '<div class="dpr"><div class="dpl">Email</div><input class="dpf" id="d-em" value="' + (s.email || s.ccEmail || '') + '"/></div>';
-  html += '<div class="dpr"><div class="dpl">Website</div><input class="dpf" id="d-wb" value="' + (s.website || '') + '"/></div>';
-  html += '</div></div>';
-  html += '<div class="dps"><div class="dpsh">Scheduling</div><div class="dpsb">';
-  html += '<div class="dpr"><div class="dpl">Tool</div><select class="dpf" id="d-tl">' + toolOpts + '</select></div>';
-  html += '<div class="dpr"><div class="dpl">Event</div><input class="dpf" type="date" id="d-ev" value="' + (s.eventDate || '') + '"/></div>';
-  html += '</div></div>';
-  html += '<div class="dps"><div class="dpsh">Visit Info</div><div class="dpsb">';
-  html += '<div class="dpr"><div class="dpl">Status</div><select class="dpf" id="d-st">' + statusOpts + '</select></div>';
-  html += '<div class="dpr"><div class="dpl">Intl %</div><div class="dpv">' + (s.intlFocus || s.intlPct || '-') + '</div></div>';
-  html += '<div class="dpr"><div class="dpl">Yield</div><div class="dpv">' + (s.yieldRating || '-') + '</div></div>';
-  html += '<div class="dpr"><div class="dpl">Region</div><div class="dpv">' + (s.region || '-') + '</div></div>';
-  html += '</div></div>';
-  html += '<div class="dps"><div class="dpsh">Notes</div><div class="dpsb">';
-  html += '<textarea class="dpf" id="d-nt" rows="4" style="resize:vertical">' + (s.notes || '') + '</textarea>';
-  if (s.enrollmentNote) {
-    html += '<div style="background:#F0E8FA;padding:5px 7px;border-radius:4px;font-size:11px;color:#4A1878;margin-top:3px"><b>DI Report:</b> ' + s.enrollmentNote + '</div>';
-  }
-  html += '</div></div>';
-  html += '<button class="dpsave" onclick="saveDetail(' + id + ')">Save changes</button>';
-  document.getElementById('dp-body').innerHTML = html;
-  document.getElementById('detail-panel').classList.add('open');
+function dpSave(id){
+  var s=schools.find(function(x){return x.id===id;});
+  if(!s)return;
+  s.ccName=document.getElementById('dc-n').value;
+  s.phone=document.getElementById('dc-p').value;
+  s.email=document.getElementById('dc-e').value;
+  s.website=document.getElementById('dc-w').value;
+  s.tool=document.getElementById('dc-t').value;
+  s.eventDate=document.getElementById('dc-d').value;
+  s.visitStatus=document.getElementById('dc-s').value;
+  s.notes=document.getElementById('dc-nt').value;
+  var b=document.querySelector('.dsv');
+  b.textContent='Saved!';b.style.background='#185FA5';
+  setTimeout(function(){b.textContent='Save changes';b.style.background='#0F6E56';},1500);
 }
-
-function saveDetail(id) {
-  var s = schools.find(function(x){ return x.id === id; });
-  if (!s) return;
-  s.ccName = document.getElementById('d-cn').value;
-  s.phone = document.getElementById('d-ph').value;
-  s.email = document.getElementById('d-em').value;
-  s.website = document.getElementById('d-wb').value;
-  s.tool = document.getElementById('d-tl').value;
-  s.eventDate = document.getElementById('d-ev').value;
-  s.visitStatus = document.getElementById('d-st').value;
-  s.notes = document.getElementById('d-nt').value;
-  var b = document.querySelector('.dpsave');
-  b.textContent = 'Saved!';
-  b.style.background = '#185FA5';
-  setTimeout(function(){ b.textContent = 'Save changes'; b.style.background = '#0F6E56'; }, 1500);
-}
-
 
 function populateStateFilter() {
   const sel = document.getElementById('state-sel');
@@ -1081,7 +1051,8 @@ window.addEventListener('load', () => {
 setTimeout(() => {
   populateStateFilter();
 }, 500);
+</script>
 
-
+<div id="dp"><div id="dp-h"><h2 id="dp-n"></h2><p id="dp-l"></p><button id="dp-x" onclick="dpClose()">&#215;</button></div><div id="dp-b"></div></div>
 </body>
 </html>
