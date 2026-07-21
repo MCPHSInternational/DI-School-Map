@@ -37,6 +37,24 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .leg-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 .leg-dot{width:9px;height:9px;border-radius:50%}
 .empty{padding:20px;text-align:center;color:#888;font-size:12px}
+#detail-panel{position:absolute;top:0;right:0;width:320px;height:100%;background:#fff;border-left:1px solid #ddd;z-index:600;display:none;flex-direction:column;box-shadow:-2px 0 8px rgba(0,0,0,.1);overflow-y:auto}
+#detail-panel.open{display:flex}
+.dp-header{background:#a02842;color:#fff;padding:14px 16px;position:relative;flex-shrink:0}
+.dp-header h2{font-size:14px;font-weight:600;margin-bottom:2px}
+.dp-header .dp-sub{font-size:12px;color:rgba(255,255,255,.75)}
+.dp-close{position:absolute;right:12px;top:12px;background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:99px;width:24px;height:24px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1}
+.dp-body{padding:14px;display:flex;flex-direction:column;gap:10px;flex:1}
+.dp-section{border:1px solid #eee;border-radius:7px;overflow:hidden}
+.dp-section-head{background:#f4f4f4;padding:5px 10px;font-size:10px;font-weight:600;color:#666;text-transform:uppercase;letter-spacing:.05em}
+.dp-section-body{padding:8px 10px;display:flex;flex-direction:column;gap:5px}
+.dp-row{display:flex;gap:8px;align-items:flex-start}
+.dp-label{font-size:11px;color:#888;min-width:72px;flex-shrink:0;padding-top:2px}
+.dp-val{font-size:12px;color:#333;flex:1}
+.dp-field{width:100%;padding:5px 7px;font-size:12px;border:1px solid #ddd;border-radius:5px;font-family:inherit}
+.dp-field:focus{outline:none;border-color:#a02842}
+.dp-save{width:100%;padding:8px;background:#0F6E56;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:12px;font-weight:500}
+.dp-save:hover{background:#085041}
+.dp-layers{display:flex;gap:4px;flex-wrap:wrap;margin-top:3px}
 </style>
 </head>
 <body>
@@ -103,7 +121,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div id="school-list"></div>
   </div>
-  <div id="map-wrap">
+  <div id="map-wrap" style="position:relative">
     <div id="map"></div>
     <div class="map-legend">
       <div class="leg-row"><div class="leg-dot" style="background:#1A3C5E"></div>Secondary</div>
@@ -111,6 +129,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="leg-row"><div class="leg-dot" style="background:#854F0B"></div>University</div>
       <div class="leg-row"><div class="leg-dot" style="background:#a02842"></div>Anchor Visit</div>
       <div class="leg-row"><div class="leg-dot" style="background:#7B4FA6"></div>Prior Enrollment</div>
+    </div>
+    <div id="detail-panel">
+      <div class="dp-header">
+        <h2 id="dp-name">School Name</h2>
+        <div class="dp-sub" id="dp-sub">City, State</div>
+        <button class="dp-close" onclick="closeDetail()">×</button>
+      </div>
+      <div class="dp-body" id="dp-body"></div>
     </div>
   </div>
 </div>
@@ -762,15 +788,17 @@ function mergeAll() {
   let nextId = 500;
 
   function getKey(s) {
-    // Normalize name for matching: lowercase, remove punctuation, normalize common abbreviations
     const name = (s.name||'').toLowerCase()
-      .replace(/['\-\.]/g, '')
+      .replace(/^the\s+/, '')           // remove leading "the"
+      .replace(/['\-\.\(\)]/g, '')      // remove punctuation
       .replace(/\bhigh school\b/g, 'hs')
       .replace(/\bcommunity college\b/g, 'cc')
       .replace(/\bint'?l\b/g, 'international')
-      .replace(/\bst\b/g, 'saint')
+      .replace(/\bst\b\.?\s/g, 'saint ')
+      .replace(/\bacademy\b/g, 'academy')
+      .replace(/\binstitute\b/g, 'institute')
       .replace(/\s+/g, ' ').trim();
-    return name + '|' + (s.state||'');
+    return name + '|' + (s.state||'').toUpperCase();
   }
 
   function addLayer(s, layer) {
@@ -965,10 +993,98 @@ function hideAll() {
   applyFilters();
 }
 
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('open');
+}
+
 function showDetail(id) {
   const s = schools.find(x => x.id === id);
   if (!s) return;
   if (s.lat && s.lng) map.setView([s.lat, s.lng], 12);
+
+  document.getElementById('dp-name').textContent = s.name;
+  document.getElementById('dp-sub').textContent = `${s.city||''}${s.city&&s.state?', ':''}${s.state||''} · ${s.type||''}`;
+
+  const layers = (s.layers||[s.layer||'School']);
+  const LBADGE2 = {'Secondary School':'#E6F1FB','Community College':'#E1F5EE','University':'#FAEEDA','Anchor Visit':'#FAECEE','Prior Enrollment':'#F0E8FA'};
+  const LBADGET2 = {'Secondary School':'#0C447C','Community College':'#085041','University':'#633806','Anchor Visit':'#6B0E1E','Prior Enrollment':'#4A1878'};
+  const layerBadges = layers.map(l=>`<span class="badge" style="background:${LBADGE2[l]||'#eee'};color:${LBADGET2[l]||'#555'};font-size:10px;padding:2px 7px;border-radius:99px;font-weight:500">${l}</span>`).join(' ');
+
+  const tool_opts = ['','Scoir','MaiaLearning','Naviance','Cialfo','SchooLinks','Other'].map(t=>`<option${(s.tool||'')==t?' selected':''}>${t}</option>`).join('');
+  const status_opts = ['Not Started','Scheduled','Confirmed','Completed','Cancelled'].map(v=>`<option${(s.visitStatus||'')==v?' selected':''}>${v}</option>`).join('');
+  const priority_opts = ['High','Medium','Low'].map(p=>`<option${(s.priority||'')==p?' selected':''}>${p}</option>`).join('');
+  const layer_opts = ['Secondary School','Community College','University','Anchor Visit','Prior Enrollment'].map(l=>`<option${layers[0]===l?' selected':''}>${l}</option>`).join('');
+
+  document.getElementById('dp-body').innerHTML = `
+    <div><div class="dp-layers">${layerBadges}</div></div>
+
+    <div class="dp-section">
+      <div class="dp-section-head">Contact</div>
+      <div class="dp-section-body">
+        <div class="dp-row"><div class="dp-label">Phone</div><input class="dp-field" id="d-phone" value="${s.phone||''}"/></div>
+        <div class="dp-row"><div class="dp-label">Email</div><input class="dp-field" id="d-email" value="${s.email||''}"/></div>
+        <div class="dp-row"><div class="dp-label">Website</div><input class="dp-field" id="d-web" value="${s.website||''}"/></div>
+      </div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-head">College Counseling</div>
+      <div class="dp-section-body">
+        <div class="dp-row"><div class="dp-label">Counselor</div><input class="dp-field" id="d-ccname" value="${s.ccName||''}"/></div>
+        <div class="dp-row"><div class="dp-label">CC Email</div><input class="dp-field" id="d-ccemail" value="${s.ccEmail||''}"/></div>
+        <div class="dp-row"><div class="dp-label">CC Phone</div><input class="dp-field" id="d-ccphone" value="${s.ccPhone||''}"/></div>
+        <div class="dp-row"><div class="dp-label">Scheduler</div><select class="dp-field" id="d-tool">${tool_opts}</select></div>
+        <div class="dp-row"><div class="dp-label">Event date</div><input class="dp-field" type="date" id="d-event" value="${s.eventDate||''}"/></div>
+      </div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-head">Visit Info</div>
+      <div class="dp-section-body">
+        <div class="dp-row"><div class="dp-label">Status</div><select class="dp-field" id="d-status">${status_opts}</select></div>
+        <div class="dp-row"><div class="dp-label">Priority</div><select class="dp-field" id="d-priority">${priority_opts}</select></div>
+        <div class="dp-row"><div class="dp-label">Layer</div><select class="dp-field" id="d-layer">${layer_opts}</select></div>
+        <div class="dp-row"><div class="dp-label">Int'l focus</div><input class="dp-field" id="d-intl" value="${s.intlFocus||''}"/></div>
+      </div>
+    </div>
+
+    <div class="dp-section">
+      <div class="dp-section-head">Notes</div>
+      <div class="dp-section-body">
+        <textarea class="dp-field" id="d-notes" rows="4" style="resize:vertical">${s.notes||''}</textarea>
+        ${s.enrollmentNote?`<div style="background:#F0E8FA;border-radius:5px;padding:6px 8px;font-size:11px;color:#4A1878;margin-top:4px"><b>DI Report:</b> ${s.enrollmentNote}</div>`:''}
+      </div>
+    </div>
+
+    <button class="dp-save" onclick="saveDetail(${id})">Save changes</button>
+  `;
+
+  document.getElementById('detail-panel').classList.add('open');
+}
+
+function saveDetail(id) {
+  const s = schools.find(x => x.id === id);
+  if (!s) return;
+  s.phone    = document.getElementById('d-phone').value;
+  s.email    = document.getElementById('d-email').value;
+  s.website  = document.getElementById('d-web').value;
+  s.ccName   = document.getElementById('d-ccname').value;
+  s.ccEmail  = document.getElementById('d-ccemail').value;
+  s.ccPhone  = document.getElementById('d-ccphone').value;
+  s.tool     = document.getElementById('d-tool').value;
+  s.eventDate= document.getElementById('d-event').value;
+  s.visitStatus = document.getElementById('d-status').value;
+  s.priority = document.getElementById('d-priority').value;
+  s.intlFocus= document.getElementById('d-intl').value;
+  s.notes    = document.getElementById('d-notes').value;
+  const newLayer = document.getElementById('d-layer').value;
+  if (newLayer && !s.layers.includes(newLayer)) s.layers = [newLayer, ...s.layers.filter(l=>l!==newLayer)];
+  applyFilters();
+  // Flash save button
+  const btn = document.querySelector('.dp-save');
+  btn.textContent = '✓ Saved!';
+  btn.style.background = '#185FA5';
+  setTimeout(() => { btn.textContent = 'Save changes'; btn.style.background = '#0F6E56'; }, 1500);
 }
 
 function populateStateFilter() {
