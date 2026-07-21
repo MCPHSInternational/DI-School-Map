@@ -37,22 +37,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .leg-row{display:flex;align-items:center;gap:6px;margin-bottom:3px}
 .leg-dot{width:9px;height:9px;border-radius:50%}
 .empty{padding:20px;text-align:center;color:#888;font-size:12px}
-
-#detail-panel{position:fixed;top:50px;right:0;width:300px;height:calc(100vh - 50px);background:#fff;border-left:1px solid #ddd;z-index:600;display:none;flex-direction:column;overflow-y:auto;box-shadow:-2px 0 6px rgba(0,0,0,.1)}
-#detail-panel.open{display:flex}
-.dph{background:#a02842;color:#fff;padding:12px 14px;flex-shrink:0;position:relative}
-.dph h2{font-size:13px;font-weight:600;margin-bottom:2px;padding-right:24px}
-.dph p{font-size:11px;color:rgba(255,255,255,.75)}
-.dph-close{position:absolute;top:10px;right:10px;background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;padding:0}
-.dpb{padding:12px;display:flex;flex-direction:column;gap:8px}
-.dps{border:1px solid #eee;border-radius:6px;overflow:hidden}
-.dpsh{background:#f5f5f5;padding:4px 10px;font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.05em}
-.dpsb{padding:8px 10px;display:flex;flex-direction:column;gap:5px}
-.dpr{display:flex;gap:8px}
-.dpl{font-size:11px;color:#888;min-width:65px;flex-shrink:0;padding-top:3px}
-.dpv{font-size:12px;color:#333;flex:1}
-.dpf{width:100%;padding:4px 7px;font-size:12px;border:1px solid #ddd;border-radius:4px;font-family:inherit}
-.dpsave{width:100%;padding:7px;background:#0F6E56;color:#fff;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:500;margin-top:2px}
 </style>
 </head>
 <body>
@@ -981,60 +965,10 @@ function hideAll() {
   applyFilters();
 }
 
-function closeDetail() {
-  document.getElementById('detail-panel').classList.remove('open');
-}
-
 function showDetail(id) {
   const s = schools.find(x => x.id === id);
   if (!s) return;
   if (s.lat && s.lng) map.setView([s.lat, s.lng], 12);
-  document.getElementById('dp-name').textContent = s.name;
-  document.getElementById('dp-loc').textContent = [s.city, s.state, s.type].filter(Boolean).join(' · ');
-  const layers = (s.layers || [s.layer || 'School']).join(', ');
-  const toolOpts = ['','Scoir','MaiaLearning','Naviance','Cialfo','Other'].map(t=>'<option'+((s.tool||'')==t?' selected':'')+'>'+t+'</option>').join('');
-  const statusOpts = ['Not Started','Scheduled','Confirmed','Completed','Cancelled'].map(v=>'<option'+((s.visitStatus||'Not Started')==v?' selected':'')+'>'+v+'</option>').join('');
-  document.getElementById('dp-body').innerHTML = [
-    '<div style="font-size:11px;color:#666;margin-bottom:4px">Layers: <b>'+layers+'</b></div>',
-    '<div class="dps"><div class="dpsh">Contact</div><div class="dpsb">',
-    '<div class="dpr"><div class="dpl">Name</div><input class="dpf" id="d-cn" value="'+(s.ccName||s.contactName||'')+'"/></div>',
-    '<div class="dpr"><div class="dpl">Phone</div><input class="dpf" id="d-ph" value="'+(s.phone||'')+'"/></div>',
-    '<div class="dpr"><div class="dpl">Email</div><input class="dpf" id="d-em" value="'+(s.email||s.ccEmail||'')+'"/></div>',
-    '<div class="dpr"><div class="dpl">Website</div><input class="dpf" id="d-wb" value="'+(s.website||'')+'"/></div>',
-    '</div></div>',
-    '<div class="dps"><div class="dpsh">Scheduling</div><div class="dpsb">',
-    '<div class="dpr"><div class="dpl">Tool</div><select class="dpf" id="d-tl">'+toolOpts+'</select></div>',
-    '<div class="dpr"><div class="dpl">Event</div><input class="dpf" type="date" id="d-ev" value="'+(s.eventDate||'')+'"/></div>',
-    '</div></div>',
-    '<div class="dps"><div class="dpsh">Visit Info</div><div class="dpsb">',
-    '<div class="dpr"><div class="dpl">Status</div><select class="dpf" id="d-st">'+statusOpts+'</select></div>',
-    '<div class="dpr"><div class="dpl">Int'l %</div><div class="dpv">'+(s.intlFocus||s.intlPct||'—')+'</div></div>',
-    '<div class="dpr"><div class="dpl">Yield</div><div class="dpv">'+(s.yieldRating||'—')+'</div></div>',
-    '<div class="dpr"><div class="dpl">Region</div><div class="dpv">'+(s.region||'—')+'</div></div>',
-    '</div></div>',
-    '<div class="dps"><div class="dpsh">Notes</div><div class="dpsb">',
-    '<textarea class="dpf" id="d-nt" rows="4" style="resize:vertical">'+(s.notes||'')+'</textarea>',
-    s.enrollmentNote ? '<div style="background:#F0E8FA;padding:5px 7px;border-radius:4px;font-size:11px;color:#4A1878;margin-top:3px"><b>DI:</b> '+s.enrollmentNote+'</div>' : '',
-    '</div></div>',
-    '<button class="dpsave" onclick="saveDetail('+id+')">Save changes</button>'
-  ].join('');
-  document.getElementById('detail-panel').classList.add('open');
-}
-
-function saveDetail(id) {
-  const s = schools.find(x => x.id === id);
-  if (!s) return;
-  s.ccName = document.getElementById('d-cn').value;
-  s.phone = document.getElementById('d-ph').value;
-  s.email = document.getElementById('d-em').value;
-  s.website = document.getElementById('d-wb').value;
-  s.tool = document.getElementById('d-tl').value;
-  s.eventDate = document.getElementById('d-ev').value;
-  s.visitStatus = document.getElementById('d-st').value;
-  s.notes = document.getElementById('d-nt').value;
-  const b = document.querySelector('.dpsave');
-  b.textContent='Saved ✓'; b.style.background='#185FA5';
-  setTimeout(()=>{b.textContent='Save changes';b.style.background='#0F6E56';},1500);
 }
 
 function populateStateFilter() {
@@ -1055,14 +989,5 @@ setTimeout(() => {
   populateStateFilter();
 }, 500);
 </script>
-
-<div id="detail-panel">
-  <div class="dph">
-    <h2 id="dp-name"></h2>
-    <p id="dp-loc"></p>
-    <button class="dph-close" onclick="closeDetail()">&#215;</button>
-  </div>
-  <div class="dpb" id="dp-body"></div>
-</div>
 </body>
 </html>
