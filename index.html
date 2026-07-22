@@ -621,7 +621,7 @@ const SCHOOLS = [
   {id:491,name:"Woodbridge High School",city:"Irvine",state:"CA",type:"Secondary School",prior:true,lat:33.669,lng:-117.823,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:492,name:"Worcester Academy",city:"Worcester",state:"MA",type:"Secondary School",prior:false,lat:42.263,lng:-71.801,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:493,name:"WORCESTER POLYTECHNIC INSTITUTE",city:"Worcester",state:"MA",type:"University",prior:true,lat:42.263,lng:-71.801,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
-  {id:494,name:"Worcester State University",city:"Worcester",state:"MA",type:"University",prior:true,lat:38.907,lng:-77.037,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
+  {id:494,name:"Worcester State University",city:"Worcester",state:"MA",type:"University",prior:true,lat:42.267,lng:-71.844,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:495,name:"Xavier High School",city:"Middletown",state:"CT",type:"Secondary School",prior:true,lat:41.562,lng:-72.65,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:496,name:"Yorba Linda High School",city:"Yorba Linda",state:"CA",type:"Secondary School",prior:true,lat:37.199,lng:-120.423,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:497,name:"York College - New York",city:"Jamaica",state:"NY",type:"University",prior:true,lat:40.668,lng:-73.795,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
@@ -874,7 +874,7 @@ function fixAllCoords() {
     if (!s.city || !s.state) { done++; geocodeNext(i+1); return; }
     
     btn.textContent = 'Fixing ' + (i+1) + '/' + total + '...';
-    var query = encodeURIComponent(s.city + ', ' + s.state + ', USA');
+    var query = encodeURIComponent(s.name + ', ' + s.city + ', ' + s.state + ', USA');
     fetch('https://nominatim.openstreetmap.org/search?q=' + query + '&format=json&limit=1')
       .then(function(r) { return r.json(); })
       .then(function(data) {
