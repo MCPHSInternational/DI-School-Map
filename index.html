@@ -444,7 +444,7 @@ const SCHOOLS = [
   {id:315,name:"Renaissance High School",city:"Detroit",state:"MI",type:"Secondary School",prior:true,lat:42.357,lng:-83.069,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:316,name:"Rhode Island College",city:"Providence",state:"RI",type:"University",prior:true,lat:41.824,lng:-71.413,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:317,name:"Ridgewood High School",city:"Ridgewood",state:"NJ",type:"Secondary School",prior:true,lat:40.979,lng:-74.117,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
-  {id:318,name:"Riverhill High School",city:"",state:"",type:"Secondary School",prior:false,lat:null,lng:null,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
+  {id:318,name:"Riverhill High School",city:"Clarksville",state:"MD",type:"Secondary School",prior:false,lat:null,lng:null,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:319,name:"Rochester College",city:"Rochester Hills",state:"MI",type:"University",prior:true,lat:42.671,lng:-83.13,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:320,name:"Rollins College - Winter Park",city:"Winter Park",state:"FL",type:"University",prior:true,lat:28.407,lng:-80.936,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
   {id:321,name:"Rowan University",city:"Glassboro",state:"NJ",type:"University",prior:true,lat:38.907,lng:-77.037,phone:"",email:"",website:"",ccName:"",tool:"",eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""},
@@ -732,7 +732,7 @@ function showDetail(id) {
   h += '<div style="font-size:11px;color:#666;margin-bottom:4px">Type: <b>'+s.type+'</b>';
   if (s.prior) h += ' &nbsp;<span style="background:#fdecea;color:#a02842;padding:1px 7px;border-radius:99px;font-size:10px;font-weight:500">Prior Enrollment</span>';
   h += "</div>";
-  h += '<div class="dps"><div class="dpsh">Contact</div><div class="dpsb">';
+  h += '<div class="dps"><div class="dpsh">Location</div><div class="dpsb">';h += '<div class="dpr"><div class="dpl">City</div><input class="dpf" id="dc-city" value="'+(s.city||'')+'"/></div>';h += '<div class="dpr"><div class="dpl">State</div><input class="dpf" id="dc-state" maxlength="2" style="text-transform:uppercase" value="'+(s.state||'')+'"/></div>';h += '</div></div>';h += '<div class="dps"><div class="dpsh">Contact</div><div class="dpsb">';
   h += '<div class="dpr"><div class="dpl">Name</div><input class="dpf" id="dc-n" value="'+(s.ccName||"")+'"/></div>';
   h += '<div class="dpr"><div class="dpl">Phone</div><input class="dpf" id="dc-p" value="'+(s.phone||"")+'"/></div>';
   h += '<div class="dpr"><div class="dpl">Email</div><input class="dpf" id="dc-e" value="'+(s.email||"")+'"/></div>';
@@ -766,6 +766,8 @@ function dpSave(id) {
   s.eventDate = document.getElementById("dc-d").value;
   s.visitStatus = document.getElementById("dc-s").value;
   s.recruiter = document.getElementById("dc-r").value;
+  s.city = document.getElementById("dc-city").value;
+  s.state = document.getElementById("dc-state").value.toUpperCase();
   s.intlFocus = document.getElementById("dc-i").value;
   s.notes = document.getElementById("dc-nt").value;
   var b = document.querySelector(".dpsv");
