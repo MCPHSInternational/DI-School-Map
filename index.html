@@ -905,6 +905,7 @@ function fixAllCoords() {
 }
 
 
+function saveFile() {
   // Build updated SCHOOLS array as JS
   var schoolsJs = 'const SCHOOLS = [\n  ' + SCHOOLS.map(function(s) {
     return '{id:'+s.id+',name:"'+s.name.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'",city:"'+s.city.replace(/"/g,'\\"')+'",state:"'+s.state+'",type:"'+s.type+'",prior:'+(s.prior?'true':'false')+',lat:'+(s.lat||'null')+',lng:'+(s.lng||'null')+',phone:"'+(s.phone||'')+'",email:"'+(s.email||'')+'",website:"'+(s.website||'')+'",ccName:"'+(s.ccName||'')+'",tool:"'+(s.tool||'')+'",eventDate:"'+(s.eventDate||'')+'",visitStatus:"'+(s.visitStatus||'Not Started')+'",notes:"'+(s.notes||'').replace(/"/g,'\\"')+'",intlFocus:"'+(s.intlFocus||'')+'"}';
