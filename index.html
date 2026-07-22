@@ -645,7 +645,7 @@ function applyFilters() {
   SCHOOLS.forEach(function(s) {
     if (s.type in counts) counts[s.type]++;
     if (s.prior) counts.prior++;
-    var show = typeOn(s) && s.name.toLowerCase().includes(q) && (!st || s.state===st) && (!priorOnly || s.prior);
+    var show = (typeOn(s) || priorOnly) && s.name.toLowerCase().includes(q) && (!st || s.state===st) && (!priorOnly || s.prior);
     if (markers[s.id]) {
       if (show) { markers[s.id].addTo(map); markers[s.id].setIcon(makeIcon(s,true)); }
       else { map.removeLayer(markers[s.id]); }
