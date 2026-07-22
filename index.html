@@ -789,40 +789,61 @@ function addSchool() {
   var prior = document.getElementById('add-prior').checked;
   if (!name || !city || !state) { alert('Name, city and state are required.'); return; }
 
-  // Look up approximate coords by state
-  var STATE_CENTERS = {MA:[42.407,-71.382],CT:[41.603,-72.707],ME:[44.694,-69.381],NH:[43.452,-71.563],
-    VT:[44.045,-72.710],RI:[41.680,-71.511],NY:[42.965,-75.526],NJ:[40.058,-74.405],
-    PA:[40.590,-77.209],MD:[39.063,-76.802],VA:[37.431,-78.656],NC:[35.630,-79.806],
-    SC:[33.836,-80.901],GA:[32.157,-82.907],FL:[27.766,-81.686],AL:[32.318,-86.902],
-    MS:[32.354,-89.398],TN:[35.518,-86.580],KY:[37.668,-84.670],WV:[38.491,-80.954],
-    OH:[40.388,-82.765],IN:[39.849,-86.258],MI:[44.182,-84.507],WI:[44.268,-89.617],
-    MN:[46.392,-94.636],IA:[42.033,-93.581],MO:[38.457,-92.288],IL:[40.043,-89.000],
-    ND:[47.528,-99.784],SD:[44.299,-99.438],NE:[41.492,-99.901],KS:[38.527,-96.726],
-    TX:[31.169,-100.076],OK:[35.007,-97.093],AR:[34.799,-92.199],LA:[30.978,-91.962],
-    CA:[36.778,-119.418],OR:[43.804,-120.554],WA:[47.751,-120.740],NV:[38.313,-117.055],
-    AZ:[34.048,-111.094],NM:[34.307,-106.018],UT:[39.321,-111.094],CO:[39.550,-105.779],
-    MT:[46.879,-110.363],WY:[43.075,-107.290],ID:[44.068,-114.742],AK:[61.385,-152.269],HI:[19.896,-155.582]};
-  var center = STATE_CENTERS[state] || [39.5,-98.35];
-  var lat = center[0] + (Math.random()-0.5)*1.5;
-  var lng = center[1] + (Math.random()-0.5)*2;
+  var btn = document.querySelector('#add-form button');
+  btn.textContent = 'Looking up...';
+  btn.disabled = true;
 
-  var s = {id:nextId++,name:name,city:city,state:state,type:type,prior:prior,
-    lat:lat,lng:lng,phone:"",email:"",website:"",ccName:"",tool:"",
-    eventDate:"",visitStatus:"Not Started",notes:"",intlFocus:""};
-  SCHOOLS.push(s);
+  // Geocode using Nominatim
+  var query = encodeURIComponent(city + ', ' + state + ', USA');
+  fetch('https://nominatim.openstreetmap.org/search?q=' + query + '&format=json&limit=1')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var lat, lng;
+      if (data && data[0]) {
+        lat = parseFloat(data[0].lat);
+        lng = parseFloat(data[0].lon);
+      } else {
+        // Fallback to state center
+        var STATE_CENTERS = {MA:[42.407,-71.382],CT:[41.603,-72.707],ME:[44.694,-69.381],NH:[43.452,-71.563],
+          VT:[44.045,-72.710],RI:[41.680,-71.511],NY:[42.965,-75.526],NJ:[40.058,-74.405],
+          PA:[40.590,-77.209],MD:[39.063,-76.802],VA:[37.431,-78.656],NC:[35.630,-79.806],
+          SC:[33.836,-80.901],GA:[32.157,-82.907],FL:[27.766,-81.686],AL:[32.318,-86.902],
+          MS:[32.354,-89.398],TN:[35.518,-86.580],KY:[37.668,-84.670],WV:[38.491,-80.954],
+          OH:[40.388,-82.765],IN:[39.849,-86.258],MI:[44.182,-84.507],WI:[44.268,-89.617],
+          MN:[46.392,-94.636],IA:[42.033,-93.581],MO:[38.457,-92.288],IL:[40.043,-89.000],
+          TX:[31.169,-100.076],CA:[36.778,-119.418],OR:[43.804,-120.554],WA:[47.751,-120.740],
+          AZ:[34.048,-111.094],CO:[39.550,-105.779],ID:[44.068,-114.742],AK:[61.385,-152.269],HI:[19.896,-155.582]};
+        var center = STATE_CENTERS[state] || [39.5,-98.35];
+        lat = center[0] + (Math.random()-0.5)*0.5;
+        lng = center[1] + (Math.random()-0.5)*0.5;
+        alert('Could not find exact location for "' + city + ', ' + state + '" — placed at approximate state location. You can correct it later via the detail panel.');
+      }
 
-  var m = L.marker([s.lat,s.lng],{icon:makeIcon(s,true)}).addTo(map);
-  m.bindTooltip(s.name+'<br><span style="color:#888;font-size:11px">'+s.city+', '+s.state+(s.recruiter ? ' &nbsp;&#183;&nbsp; <b>'+s.recruiter+'</b>' : '')+'</span>',{direction:'top',offset:[0,-6]});
-  m.on('click',function(){showDetail(s.id);});
-  markers[s.id] = m;
+      var s = {id:nextId++,name:name,city:city,state:state,type:type,prior:prior,
+        lat:lat,lng:lng,phone:'',email:'',website:'',ccName:'',tool:'',recruiter:'',
+        eventDate:'',visitStatus:'Not Started',notes:'',intlFocus:''};
+      SCHOOLS.push(s);
 
-  document.getElementById('add-name').value='';
-  document.getElementById('add-city').value='';
-  document.getElementById('add-state').value='';
-  document.getElementById('add-prior').checked=false;
-  toggleAddForm();
-  applyFilters();
-  map.setView([lat,lng],10);
+      var m = L.marker([s.lat,s.lng],{icon:makeIcon(s,true)}).addTo(map);
+      m.bindTooltip(s.name+'<br><span style="color:#888;font-size:11px">'+s.city+', '+s.state+'</span>',{direction:'top',offset:[0,-6]});
+      m.on('click',function(){showDetail(s.id);});
+      markers[s.id] = m;
+
+      document.getElementById('add-name').value='';
+      document.getElementById('add-city').value='';
+      document.getElementById('add-state').value='';
+      document.getElementById('add-prior').checked=false;
+      btn.textContent = 'Add';
+      btn.disabled = false;
+      toggleAddForm();
+      applyFilters();
+      map.setView([lat,lng],12);
+    })
+    .catch(function() {
+      btn.textContent = 'Add';
+      btn.disabled = false;
+      alert('Could not look up location. Check your internet connection and try again.');
+    });
 }
 
 function deleteSchool(id) {
