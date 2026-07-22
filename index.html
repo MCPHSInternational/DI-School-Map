@@ -68,6 +68,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;backgrou
   <div>
     <button class="tbtn" onclick="showAll()">Show all</button>
     <button class="tbtn" onclick="hideAll()">Hide all</button>
+    <button class="tbtn" onclick="fixAllCoords()" style="background:rgba(255,255,255,.15)" title="Geocode all schools to correct locations">&#128205; Fix locations</button>
     <button class="tbtn" onclick="saveFile()" style="background:rgba(255,255,255,.25);border-color:rgba(255,255,255,.5);font-weight:500">&#8595; Save file</button>
   </div>
 </div>
@@ -855,7 +856,55 @@ function deleteSchool(id) {
   applyFilters();
 }
 
-function saveFile() {
+function fixAllCoords() {
+  if (!confirm('This will look up the correct location for all ' + SCHOOLS.length + ' schools using OpenStreetMap. It takes about 10 minutes and must stay open. Continue?')) return;
+
+  var btn = document.querySelector('[onclick="fixAllCoords()"]');
+  var total = SCHOOLS.length;
+  var done = 0, fixed = 0, failed = [];
+
+  function geocodeNext(i) {
+    if (i >= SCHOOLS.length) {
+      btn.textContent = '&#128205; Fix locations';
+      btn.disabled = false;
+      alert('Done! ' + fixed + ' schools updated, ' + failed.length + ' could not be found.\nClick "Save file" to keep the changes permanently.');
+      return;
+    }
+    var s = SCHOOLS[i];
+    if (!s.city || !s.state) { done++; geocodeNext(i+1); return; }
+    
+    btn.textContent = 'Fixing ' + (i+1) + '/' + total + '...';
+    var query = encodeURIComponent(s.city + ', ' + s.state + ', USA');
+    fetch('https://nominatim.openstreetmap.org/search?q=' + query + '&format=json&limit=1')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && data[0]) {
+          var lat = parseFloat(data[0].lat);
+          var lng = parseFloat(data[0].lon);
+          s.lat = lat; s.lng = lng;
+          if (markers[s.id]) {
+            markers[s.id].setLatLng([lat, lng]);
+            markers[s.id].setTooltipContent(s.name + '<br><span style="color:#888;font-size:11px">' + s.city + ', ' + s.state + '</span>');
+          }
+          fixed++;
+        } else {
+          failed.push(s.name);
+        }
+        done++;
+        setTimeout(function() { geocodeNext(i+1); }, 1100);
+      })
+      .catch(function() {
+        failed.push(s.name);
+        done++;
+        setTimeout(function() { geocodeNext(i+1); }, 1100);
+      });
+  }
+
+  btn.disabled = true;
+  geocodeNext(0);
+}
+
+
   // Build updated SCHOOLS array as JS
   var schoolsJs = 'const SCHOOLS = [\n  ' + SCHOOLS.map(function(s) {
     return '{id:'+s.id+',name:"'+s.name.replace(/\\/g,'\\\\').replace(/"/g,'\\"')+'",city:"'+s.city.replace(/"/g,'\\"')+'",state:"'+s.state+'",type:"'+s.type+'",prior:'+(s.prior?'true':'false')+',lat:'+(s.lat||'null')+',lng:'+(s.lng||'null')+',phone:"'+(s.phone||'')+'",email:"'+(s.email||'')+'",website:"'+(s.website||'')+'",ccName:"'+(s.ccName||'')+'",tool:"'+(s.tool||'')+'",eventDate:"'+(s.eventDate||'')+'",visitStatus:"'+(s.visitStatus||'Not Started')+'",notes:"'+(s.notes||'').replace(/"/g,'\\"')+'",intlFocus:"'+(s.intlFocus||'')+'"}';
